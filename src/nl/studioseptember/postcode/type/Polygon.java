@@ -2,11 +2,14 @@ package nl.studioseptember.postcode.type;
 
 import java.io.IOException;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.OrderColumn;
 import javax.persistence.Table;
 
 import net.opengis.gml.AbstractRingType;
@@ -45,11 +48,13 @@ public class Polygon {
 			if(pointDims > 2) {
 				coord = coord.withZ(doubles.get(a * pointDims+2));
 			}
-			this.points[a] = new Point(Transform.rdnap2etrs(coord));
+			this.points[a] = new Point(Transform.rdnap2etrs(coord), this.id);
 		}
 
 	}
 
 	
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "polygonId")
+	@OrderColumn(name = "id")
 	Point[] points;
 }

@@ -66,9 +66,9 @@ public class Parser {
 		Transaction tx = session.beginTransaction();
 		
 		for(Woonplaats woonplaats: woonplaatsen.values()) {
-			for(Polygon polygon: woonplaats.getSurface()) {
-				session.persist(polygon);
-			}
+			//for(Polygon polygon: woonplaats.getSurface()) {
+			//	session.persist(polygon);
+			//}
 			session.persist(woonplaats);
 		}
 		
@@ -83,8 +83,7 @@ public class Parser {
 		tx.commit();
 		
 		
-		System.in.read();
-		
+		log("Done.");
 	}
 	private static Map<Long, Woonplaats> woonplaatsen = new HashMap<Long, Woonplaats>();
 	private static Map<Long, OpenbareRuimte> openbareRuimtes = new HashMap<Long, OpenbareRuimte>();
@@ -142,10 +141,12 @@ public class Parser {
 	}
 	
 	private static void parseWoonplaatsen(LVCProduct product) throws IOException {
-		
+		int count = 0;
 		for (var woonplaats : product.getWoonplaats()) {
 			Woonplaats parsed = new Woonplaats(woonplaats);
 			woonplaatsen.put(parsed.getIdentificatie(), parsed);
+			if(count > 10)
+				break;
 		}
 		
 	}

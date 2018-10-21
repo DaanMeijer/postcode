@@ -25,10 +25,12 @@ public class Point {
 	private double longitude;
 	private double height;
 	
-	public Point(Geographic g) {
+	public Point(Geographic g, Long polygonId) {
 		this.latitude = g.lambda;
 		this.longitude = g.phi;
 		this.height = g.h;
+		
+		this.polygonId = polygonId;
 	}
 	
 	

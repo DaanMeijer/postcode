@@ -4,10 +4,13 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderColumn;
+import javax.persistence.Table;
 import javax.xml.bind.JAXBElement;
 
 import net.opengis.gml.AbstractSurfaceType;
@@ -18,9 +21,11 @@ import net.opengis.gml.SurfacePropertyType;
 import nl.kadaster.schemas.imbag.imbag_types.v20090901.VlakOfMultiVlak;
 
 @Entity 
+@Table(name = "cities")
 public class Woonplaats extends Base {
 	
-	@OneToMany(mappedBy = "objectId")
+	@OneToMany(cascade=CascadeType.ALL)
+	@JoinColumn(name = "object_id")
 	@OrderColumn(name = "id")
 	private Polygon[] surface;
 	
