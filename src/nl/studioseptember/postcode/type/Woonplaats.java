@@ -5,7 +5,9 @@ import java.util.LinkedList;
 import java.util.List;
 
 import javax.persistence.Column;
+import javax.persistence.Entity;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderColumn;
 import javax.xml.bind.JAXBElement;
 
 import net.opengis.gml.AbstractSurfaceType;
@@ -15,13 +17,23 @@ import net.opengis.gml.SurfaceArrayPropertyType;
 import net.opengis.gml.SurfacePropertyType;
 import nl.kadaster.schemas.imbag.imbag_types.v20090901.VlakOfMultiVlak;
 
+@Entity 
 public class Woonplaats extends Base {
 	
-	@OneToMany
-	Polygon[] surface;
+	@OneToMany(mappedBy = "objectId")
+	@OrderColumn(name = "id")
+	private Polygon[] surface;
 	
 	@Column(name = "name")
-	String naam;
+	private String naam;
+
+	public Polygon[] getSurface() {
+		return surface;
+	}
+
+	public void setSurface(Polygon[] surface) {
+		this.surface = surface;
+	}
 
 	public String getNaam() {
 		return naam;
@@ -72,7 +84,7 @@ public class Woonplaats extends Base {
 			this.surface = new Polygon[polygons.size()];
 
 			for (var a = 0; a < polygons.size(); a++) {
-				this.surface[a] = new Polygon(polygons.get(a));
+				this.surface[a] = new Polygon(polygons.get(a), this.identificatie);
 			}
 		}
 

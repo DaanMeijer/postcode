@@ -15,11 +15,17 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
 import nl.kadaster.schemas.bag_verstrekkingen.extract_deelbestand_lvc.v20090901.BAGExtractDeelbestandLVC;
 import nl.kadaster.schemas.bag_verstrekkingen.extract_deelbestand_lvc.v20090901.BAGExtractDeelbestandLVC.Antwoord;
 import nl.kadaster.schemas.bag_verstrekkingen.extract_producten_lvc.v20090901.LVCProduct;
 import nl.studioseptember.postcode.type.Nummer;
 import nl.studioseptember.postcode.type.OpenbareRuimte;
+import nl.studioseptember.postcode.type.Polygon;
 import nl.studioseptember.postcode.type.Woonplaats;
 
 public class Parser {
@@ -34,12 +40,17 @@ public class Parser {
 
 		Locale.setDefault(Locale.ENGLISH);
 		
+		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("spring.xml");
+		
+		//NummerRepository repository = context.getBean(NummerRepository.class);
+		
+		
 		log("Starting");
 		
 		var files = new File[] {
 				new File("var/9999WPL08092018.zip"),
-				new File("var/9999OPR08092018.zip"),
-				new File("var/9999NUM08092018.zip"),
+//				new File("var/9999OPR08092018.zip"),
+//				new File("var/9999NUM08092018.zip"),
 		};
 		
 		for(File file: files) {
@@ -48,6 +59,28 @@ public class Parser {
 		
 		log("Persisting");
 		
+		SessionFactory sessionFactory = context.getBean(SessionFactory.class);
+
+		Session session = sessionFactory.openSession();
+		
+		Transaction tx = session.beginTransaction();
+		
+		for(Woonplaats woonplaats: woonplaatsen.values()) {
+			for(Polygon polygon: woonplaats.getSurface()) {
+				session.persist(polygon);
+			}
+			session.persist(woonplaats);
+		}
+		
+
+		for(OpenbareRuimte openbareRuimte: openbareRuimtes.values()) {
+			session.persist(openbareRuimte);
+		}
+		
+		for(Nummer nummer: nummers.values()) {
+			session.persist(nummer);
+		}
+		tx.commit();
 		
 		
 		System.in.read();

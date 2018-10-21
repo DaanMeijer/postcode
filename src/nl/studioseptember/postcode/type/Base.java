@@ -8,6 +8,7 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Id;
+import javax.persistence.MappedSuperclass;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
@@ -15,7 +16,8 @@ import nl.kadaster.schemas.imbag.imbag_types.v20090901.Bron;
 import nl.kadaster.schemas.imbag.imbag_types.v20090901.Indicatie;
 import nl.kadaster.schemas.imbag.imbag_types.v20090901.Tijdvakgeldigheid;
 
-public class Base {
+@MappedSuperclass
+public abstract class Base {
 
 	@Id
 	@Column(name = "id")
