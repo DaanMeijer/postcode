@@ -11,6 +11,7 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderColumn;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import net.opengis.gml.AbstractRingType;
 import net.opengis.gml.LinearRingType;
@@ -53,8 +54,8 @@ public class Polygon {
 
 	}
 
-	
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "polygonId")
-	@OrderColumn(name = "id")
+	@Transient
+//	@OneToMany(cascade = CascadeType.ALL, mappedBy = "polygonId")
+//	@OrderColumn(name = "id")
 	Point[] points;
 }
