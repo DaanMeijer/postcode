@@ -2,14 +2,12 @@ package nl.studioseptember.postcode.type;
 
 import java.io.IOException;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderColumn;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -21,11 +19,15 @@ import rdnaptrans.value.Cartesian;
 
 @Entity
 @Table(name = "polygons")
+
+//@SequenceGenerator(name="seq", initialValue=1, allocationSize=100)
+
 public class Polygon {
 	
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@GeneratedValue(/*strategy = GenerationType.SEQUENCE, generator = "seq"*/)	
+	@Column(name = "id")
+    private long id;
 
 	@Column(name = "object_id")
 	private Long objectId;

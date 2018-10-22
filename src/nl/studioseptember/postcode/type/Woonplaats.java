@@ -1,17 +1,18 @@
 package nl.studioseptember.postcode.type;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderColumn;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.xml.bind.JAXBElement;
 
 import net.opengis.gml.AbstractSurfaceType;
@@ -25,20 +26,25 @@ import nl.kadaster.schemas.imbag.imbag_types.v20090901.VlakOfMultiVlak;
 @Table(name = "cities")
 public class Woonplaats extends Base {
 	
-//	@Transient
-	@OneToMany(cascade=CascadeType.ALL)
-	@JoinColumn(name = "object_id")
+	/** /
+	@Transient
+	/*/
+	@OneToMany(cascade=CascadeType.ALL, orphanRemoval = true)
+	@JoinColumn(name = "object_id", 
+		foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT)
+	)
 	@OrderColumn(name = "id")
-	private Polygon[] surface;
+	/**/
+	private List<Polygon> surface;
 	
 	@Column(name = "name")
 	private String naam;
 
-	public Polygon[] getSurface() {
+	public List<Polygon> getSurface() {
 		return surface;
 	}
 
-	public void setSurface(Polygon[] surface) {
+	public void setSurface(List<Polygon> surface) {
 		this.surface = surface;
 	}
 
@@ -88,10 +94,10 @@ public class Woonplaats extends Base {
 				}
 			}
 
-			this.surface = new Polygon[polygons.size()];
+			this.surface = new ArrayList<Polygon>(polygons.size());
 
 			for (var a = 0; a < polygons.size(); a++) {
-				this.surface[a] = new Polygon(polygons.get(a), this.identificatie);
+				this.surface.add(a, new Polygon(polygons.get(a), this.identificatie));
 			}
 		}
 

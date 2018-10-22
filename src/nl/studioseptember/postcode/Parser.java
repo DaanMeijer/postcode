@@ -15,6 +15,8 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
+import org.apache.log4j.Logger;
+
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -30,12 +32,10 @@ import nl.studioseptember.postcode.type.Woonplaats;
 
 public class Parser {
 
+	final static Logger LOG = Logger.getLogger(Parser.class);
+	
 	private static Date start = new Date();
 	
-	public static void log(Object object) {
-		double ms = (double) (new Date().getTime() - start.getTime());
-		System.out.printf("[%02.3f]: %s\n", ms / 1000, object.toString());
-	}
 	public static void main(String[] args) throws JAXBException, IOException {
 
 		Locale.setDefault(Locale.ENGLISH);
@@ -45,7 +45,7 @@ public class Parser {
 		//NummerRepository repository = context.getBean(NummerRepository.class);
 		
 		
-		log("Starting");
+		LOG.info("Starting");
 		
 		var files = new File[] {
 				new File("var/9999WPL08092018.zip"),
@@ -57,7 +57,7 @@ public class Parser {
 			parseZip(file);
 		}
 		
-		log("Persisting");
+		LOG.info("Persisting");
 		
 		SessionFactory sessionFactory = context.getBean(SessionFactory.class);
 
@@ -66,9 +66,9 @@ public class Parser {
 		Transaction tx = session.beginTransaction();
 		
 		for(Woonplaats woonplaats: woonplaatsen.values()) {
-			//for(Polygon polygon: woonplaats.getSurface()) {
-			//	session.persist(polygon);
-			//}
+			for(Polygon polygon: woonplaats.getSurface()) {
+				session.persist(polygon);
+			}
 			session.persist(woonplaats);
 		}
 		
@@ -83,7 +83,7 @@ public class Parser {
 		tx.commit();
 		
 		
-		log("Done.");
+		LOG.info("Done.");
 	}
 	private static Map<Long, Woonplaats> woonplaatsen = new HashMap<Long, Woonplaats>();
 	private static Map<Long, OpenbareRuimte> openbareRuimtes = new HashMap<Long, OpenbareRuimte>();
@@ -94,28 +94,28 @@ public class Parser {
 		ZipEntry entry;
 		while((entry = zis.getNextEntry()) != null) {
 			if(entry.getName().endsWith(".xml")) {
-				log("Parsing " + entry.getName());
+				LOG.info("Parsing " + entry.getName());
 				var product = parseLVCProduct(zis);
-				log("Parsed " + entry.getName());
+				LOG.info("Parsed " + entry.getName());
 				
 				parseWoonplaatsen(product);
 				
-				log("Have woonplaatsen: " + woonplaatsen.size());
+				LOG.info("Have woonplaatsen: " + woonplaatsen.size());
 				
 				parseOpenbareRuimtes(product);
 				
-				log("Have openbare ruimtes: " + openbareRuimtes.size());
+				LOG.info("Have openbare ruimtes: " + openbareRuimtes.size());
 				
 				parseNummers(product);
-				log("Have nummers: " + nummers.size());
+				LOG.info("Have nummers: " + nummers.size());
 			}else {
-				log("Skipping " + entry.getName());
+				LOG.info("Skipping " + entry.getName());
 			}
 		}
 	}
 	
 	private static void parseOpenbareRuimtes(LVCProduct product) {
-		for (var openbareRuimte : product.getOpenbareRuimte()) {
+		for (var openbareRuimte: product.getOpenbareRuimte()) {
 			var parsed = new OpenbareRuimte(openbareRuimte, woonplaatsen);
 			openbareRuimtes.put(parsed.getIdentificatie(), parsed);
 		}
@@ -143,9 +143,10 @@ public class Parser {
 	private static void parseWoonplaatsen(LVCProduct product) throws IOException {
 		int count = 0;
 		for (var woonplaats : product.getWoonplaats()) {
+			count++;
 			Woonplaats parsed = new Woonplaats(woonplaats);
 			woonplaatsen.put(parsed.getIdentificatie(), parsed);
-			if(count > 10)
+			if(count >= 1)
 				break;
 		}
 		
