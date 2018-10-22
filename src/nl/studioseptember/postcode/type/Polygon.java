@@ -2,14 +2,17 @@ package nl.studioseptember.postcode.type;
 
 import java.io.IOException;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.SequenceGenerator;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
+import javax.persistence.OrderColumn;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 
 import net.opengis.gml.AbstractRingType;
 import net.opengis.gml.LinearRingType;
@@ -25,8 +28,8 @@ import rdnaptrans.value.Cartesian;
 public class Polygon {
 	
 	@Id
-	@GeneratedValue(/*strategy = GenerationType.SEQUENCE, generator = "seq"*/)	
-	@Column(name = "id")
+	@GeneratedValue(strategy = GenerationType.IDENTITY/*, generator = "seq"*/)	
+	@Column(name = "id"/*, insertable = false, updatable = false, nullable = false*/)
     private long id;
 
 	@Column(name = "object_id")
@@ -56,8 +59,9 @@ public class Polygon {
 
 	}
 
-	@Transient
-//	@OneToMany(cascade = CascadeType.ALL, mappedBy = "polygonId")
-//	@OrderColumn(name = "id")
+//	@Transient
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn(name = "polygonId")
+	@OrderColumn(name = "id", insertable = false, updatable = false)
 	Point[] points;
 }

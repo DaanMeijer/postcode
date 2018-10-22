@@ -65,11 +65,11 @@ public class Parser {
 		
 		Transaction tx = session.beginTransaction();
 		
+		int count = 0;
 		for(Woonplaats woonplaats: woonplaatsen.values()) {
-			for(Polygon polygon: woonplaats.getSurface()) {
-				session.persist(polygon);
-			}
+			count++;
 			session.persist(woonplaats);
+			LOG.info(String.format("Persisted [% 4d/% 4d] %s", count, woonplaatsen.size(), woonplaats.getNaam()));
 		}
 		
 
@@ -146,8 +146,8 @@ public class Parser {
 			count++;
 			Woonplaats parsed = new Woonplaats(woonplaats);
 			woonplaatsen.put(parsed.getIdentificatie(), parsed);
-			if(count >= 1)
-				break;
+			//if(count >= 1)
+			//	break;
 		}
 		
 	}

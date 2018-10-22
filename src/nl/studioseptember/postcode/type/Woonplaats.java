@@ -33,7 +33,7 @@ public class Woonplaats extends Base {
 	@JoinColumn(name = "object_id", 
 		foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT)
 	)
-	@OrderColumn(name = "id")
+	@OrderColumn(name = "id", insertable = false, updatable = false)
 	/**/
 	private List<Polygon> surface;
 	
