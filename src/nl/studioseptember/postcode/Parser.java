@@ -30,6 +30,7 @@ import nl.kadaster.schemas.bag_verstrekkingen.extract_producten_lvc.v20090901.LV
 import nl.studioseptember.postcode.type.Base;
 import nl.studioseptember.postcode.type.Nummer;
 import nl.studioseptember.postcode.type.OpenbareRuimte;
+import nl.studioseptember.postcode.type.VerblijfsObject;
 import nl.studioseptember.postcode.type.Woonplaats;
 
 public class Parser {
@@ -49,9 +50,10 @@ public class Parser {
 		LOG.info("Starting");
 
 		var files = new File[] { 
-				new File("var/9999WPL08092018.zip"),
-				new File("var/9999OPR08092018.zip"),
-				new File("var/9999NUM08092018.zip"),
+//				new File("var/9999WPL08092018.zip"),
+//				new File("var/9999OPR08092018.zip"),
+//				new File("var/9999NUM08092018.zip"),
+				new File("var/9999VBO08092018.zip"),
 		};
 
 		for (File file : files) {
@@ -116,6 +118,7 @@ public class Parser {
 	private static Map<Long, Woonplaats> woonplaatsen = new HashMap<Long, Woonplaats>();
 	private static Map<Long, OpenbareRuimte> openbareRuimtes = new HashMap<Long, OpenbareRuimte>();
 	private static Map<Long, Nummer> nummers = new HashMap<Long, Nummer>();
+	private static Map<Long, VerblijfsObject> verblijfsobjecten = new HashMap<Long, VerblijfsObject>();
 
 	private static void parseZip(File zip) throws JAXBException, IOException {
 		ZipInputStream zis = new ZipInputStream(new FileInputStream(zip));
@@ -136,6 +139,10 @@ public class Parser {
 
 				parseNummers(product);
 				LOG.info("Have nummers: " + nummers.size());
+
+				parseVerblijfsObjecten(product);
+				LOG.info("Have verblijfsobjecten: " + verblijfsobjecten.size());
+				
 			} else {
 				LOG.info("Skipping " + entry.getName());
 			}
@@ -172,6 +179,14 @@ public class Parser {
 		for (var woonplaats : product.getWoonplaats()) {
 			Woonplaats parsed = new Woonplaats(woonplaats);
 			woonplaatsen.put(parsed.getIdentificatie(), parsed);
+		}
+
+	}
+
+	private static void parseVerblijfsObjecten(LVCProduct product) throws IOException {
+		for (var verblijfsobject : product.getVerblijfsobject()) {
+			VerblijfsObject parsed = new VerblijfsObject(verblijfsobject);
+			verblijfsobjecten .put(parsed.getIdentificatie(), parsed);
 		}
 
 	}

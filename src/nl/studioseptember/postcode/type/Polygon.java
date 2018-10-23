@@ -6,8 +6,6 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
@@ -15,6 +13,8 @@ import javax.persistence.OrderColumn;
 import javax.persistence.Table;
 
 import net.opengis.gml.AbstractRingType;
+import net.opengis.gml.AbstractSurfaceType;
+import net.opengis.gml.DirectPositionListType;
 import net.opengis.gml.LinearRingType;
 import net.opengis.gml.PolygonType;
 import rdnaptrans.Transform;
@@ -37,17 +37,27 @@ public class Polygon {
 	@Column(name = "object_id")
 	private Long objectId;
 	
-	public Polygon(PolygonType polygon, Long objectId) throws IOException {
+	public Polygon(Long objectId) {
 
 		this.id = nextId++;
-		
 		this.objectId = objectId;
+		
+	}
+	
+	public Polygon(PolygonType polygon, Long objectId) throws IOException {
+
+		
+		this(objectId);
+		
 		AbstractRingType abstractRing = polygon.getExterior().getRing().getValue();
 		LinearRingType linearRing = (LinearRingType) abstractRing; 
 		
 		var positions = linearRing.getPosList();
-		
-		
+		this.setPositions(positions);
+
+	}
+
+	public void setPositions(DirectPositionListType positions) throws IOException {
 		var doubles = positions.getValue();
 		var pointDims = positions.getSrsDimension().intValue();
 		var pointCount = positions.getCount().intValue();
@@ -61,8 +71,8 @@ public class Polygon {
 			}
 			this.points[a] = new Point(Transform.rdnap2etrs(coord), this.id);
 		}
-
 	}
+	
 
 //	@Transient
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)

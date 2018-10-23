@@ -26,15 +26,11 @@ import nl.kadaster.schemas.imbag.imbag_types.v20090901.VlakOfMultiVlak;
 @Table(name = "cities")
 public class Woonplaats extends Base {
 	
-	/** /
-	@Transient
-	/*/
 	@OneToMany(cascade=CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name = "object_id", 
 		foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT)
 	)
 	@OrderColumn(name = "id", insertable = false, updatable = false)
-	/**/
 	private List<Polygon> surface;
 	
 	@Column(name = "name")

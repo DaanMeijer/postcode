@@ -22,6 +22,7 @@ import nl.kadaster.schemas.imbag.imbag_types.v20090901.Indicatie;
 import nl.kadaster.schemas.imbag.imbag_types.v20090901.PuntOfVlak;
 import nl.kadaster.schemas.imbag.imbag_types.v20090901.StatusVerblijfsobject;
 import nl.kadaster.schemas.imbag.imbag_types.v20090901.Tijdvakgeldigheid;
+import nl.studioseptember.postcode.type.BaseInterface;
 
 
 /**
@@ -92,7 +93,7 @@ import nl.kadaster.schemas.imbag.imbag_types.v20090901.Tijdvakgeldigheid;
     "gerelateerdPand"
 })
 public class Verblijfsobject
-    extends AdresseerbaarObject
+    extends AdresseerbaarObject implements BaseInterface
 {
 
     @XmlElement(required = true)
