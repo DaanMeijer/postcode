@@ -28,14 +28,19 @@ import rdnaptrans.value.Cartesian;
 public class Polygon {
 	
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY/*, generator = "seq"*/)	
+//	@GeneratedValue(strategy = GenerationType.IDENTITY/*, generator = "seq"*/)	
 	@Column(name = "id"/*, insertable = false, updatable = false, nullable = false*/)
     private long id;
+	
+	private static long nextId = 1;
 
 	@Column(name = "object_id")
 	private Long objectId;
 	
 	public Polygon(PolygonType polygon, Long objectId) throws IOException {
+
+		this.id = nextId++;
+		
 		this.objectId = objectId;
 		AbstractRingType abstractRing = polygon.getExterior().getRing().getValue();
 		LinearRingType linearRing = (LinearRingType) abstractRing; 

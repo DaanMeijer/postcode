@@ -102,4 +102,9 @@ public class Woonplaats extends Base {
 		}
 
 	}
+	
+	@Override
+	public String toString() {
+		return "Woonplaats [" + this.naam + "]";
+	}
 }

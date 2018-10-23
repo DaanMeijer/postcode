@@ -14,8 +14,11 @@ import rdnaptrans.value.Geographic;
 public class Point {
 	
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE)
+//	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "id")
     private Long id;
+	
+	private static long nextId = 1;
 
 	@Column(name = "polygon_id")
 	private Long polygonId;
@@ -31,6 +34,8 @@ public class Point {
 		this.height = g.h;
 		
 		this.polygonId = polygonId;
+		
+		this.id = nextId++;
 	}
 	
 	

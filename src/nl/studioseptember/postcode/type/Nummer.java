@@ -35,13 +35,13 @@ public class Nummer extends Base {
 	@Column(name = "postcode")
 	private String postcode;
 
-	@ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "public_space_id", nullable = false)
+	@ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "public_space_id", nullable = true)
     @OnDelete(action = OnDeleteAction.CASCADE)
 	private OpenbareRuimte openbareRuimte;
 	
-	@ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "city_id", nullable = false)
+	@ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "city_id", nullable = true)
     @OnDelete(action = OnDeleteAction.CASCADE)
 	private Woonplaats woonplaats;
 	
@@ -62,6 +62,30 @@ public class Nummer extends Base {
 		if(nummer.getGerelateerdeOpenbareRuimte() != null) {
 			this.openbareRuimte = openbareRuimteLookup.get(Long.parseLong(nummer.getGerelateerdeOpenbareRuimte().getIdentificatie()));
 		}
+	}
+	
+	@Override
+	public String toString() {
+		String base = "";
+		if(this.woonplaats != null) {
+			base += this.woonplaats.getNaam() + " ";
+		}
+
+		if(this.openbareRuimte != null) {
+			base += this.openbareRuimte.getNaam() + " ";
+		}
+		
+		base += this.nummer;
+		
+		if(this.letter != null) {
+			base += this.letter;
+		}
+		
+		if(this.toevoeging != null) {
+			base += "-"+this.toevoeging;
+		}
+		
+		return base;
 	}
 
 }
