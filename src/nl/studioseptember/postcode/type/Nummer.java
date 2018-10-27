@@ -35,19 +35,14 @@ public class Nummer extends Base {
 	@Column(name = "postcode")
 	private String postcode;
 
-	@ManyToOne(fetch = FetchType.LAZY, optional = true)
-    @JoinColumn(name = "public_space_id", nullable = true)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-	private OpenbareRuimte openbareRuimte;
+    @Column(name = "public_space_id")
+	private Long openbareRuimteId;
 	
-	@ManyToOne(fetch = FetchType.LAZY, optional = true)
-    @JoinColumn(name = "city_id", nullable = true)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-	private Woonplaats woonplaats;
-	
+    @Column(name = "city_id")
+	private Long woonplaatsId;
 		
 
-	public Nummer(Nummeraanduiding nummer, Map<Long, Woonplaats> woonplaatsLookup, Map<Long, OpenbareRuimte> openbareRuimteLookup) {
+	public Nummer(Nummeraanduiding nummer) {
 		super(nummer);
 		
 		this.status = nummer.getNummeraanduidingStatus();
@@ -57,23 +52,23 @@ public class Nummer extends Base {
 		this.letter = nummer.getHuisletter();
 
 		if(nummer.getGerelateerdeWoonplaats() != null) {
-			this.woonplaats = woonplaatsLookup.get(Long.parseLong(nummer.getGerelateerdeWoonplaats().getIdentificatie()));
+			this.woonplaatsId = (Long.parseLong(nummer.getGerelateerdeWoonplaats().getIdentificatie()));
 		}
 		if(nummer.getGerelateerdeOpenbareRuimte() != null) {
-			this.openbareRuimte = openbareRuimteLookup.get(Long.parseLong(nummer.getGerelateerdeOpenbareRuimte().getIdentificatie()));
+			this.openbareRuimteId = (Long.parseLong(nummer.getGerelateerdeOpenbareRuimte().getIdentificatie()));
 		}
 	}
 	
 	@Override
 	public String toString() {
 		String base = "";
-		if(this.woonplaats != null) {
-			base += this.woonplaats.getNaam() + " ";
-		}
-
-		if(this.openbareRuimte != null) {
-			base += this.openbareRuimte.getNaam() + " ";
-		}
+//		if(this.woonplaats != null) {
+//			base += this.woonplaats.getNaam() + " ";
+//		}
+//
+//		if(this.openbareRuimte != null) {
+//			base += this.openbareRuimte.getNaam() + " ";
+//		}
 		
 		base += this.nummer;
 		

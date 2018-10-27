@@ -5,6 +5,8 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Id;
@@ -19,8 +21,12 @@ import nl.kadaster.schemas.imbag.imbag_types.v20090901.Tijdvakgeldigheid;
 @MappedSuperclass
 public abstract class Base {
 
+	private static Long nextId = 1L;
+	
 	@Id
-	@Column(name = "id")
+	protected Long id = nextId++;
+	
+	@Column(name = "bag_id")
 	protected Long identificatie;
 	
 	@Column(name = "record_inactive")
@@ -155,14 +161,25 @@ public abstract class Base {
         	new SimpleDateFormat("YYYYMMDD"),
     };
     
+    private static Map<String, Date> map = new HashMap<String, Date>();
+    
     private static Date parseDate(String input) {
     	if(input == null) {
     		return null;
     	}
     	
+    	Date date = map.get(input);
+    	if(date != null) {
+    		return date;
+    	}
+    	
     	for(DateFormat format: dateFormats) {
     		try {
-    			return format.parse(input);
+    			date = format.parse(input);
+    			if(date != null) {
+    				map.put(input, date);
+    			}
+    			return date;
     		}catch(ParseException pe) {
     			//ignore a parsing exception
     		}

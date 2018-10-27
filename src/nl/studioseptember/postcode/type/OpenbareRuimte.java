@@ -4,12 +4,7 @@ import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Table(name = "public_spaces")
@@ -28,13 +23,11 @@ public class OpenbareRuimte extends Base {
 	@Column(name = "short_name")
 	private String korteNaam;
 	
-	@ManyToOne
-    @JoinColumn(name = "city_id", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-	private Woonplaats woonplaats;
+    @Column(name = "city_id")
+	private Long woonplaats;
 	
 	
-	public OpenbareRuimte(nl.kadaster.schemas.imbag.lvc.v20090901.OpenbareRuimte openbareRuimte, Map<Long, Woonplaats> woonplaatsLookup) {
+	public OpenbareRuimte(nl.kadaster.schemas.imbag.lvc.v20090901.OpenbareRuimte openbareRuimte) {
 		
 		super(openbareRuimte);
 		
@@ -43,7 +36,7 @@ public class OpenbareRuimte extends Base {
 		this.status = openbareRuimte.getOpenbareruimteStatus().value();
 		this.type = openbareRuimte.getOpenbareRuimteType().value();
 
-		this.woonplaats = woonplaatsLookup.get(Long.parseLong(openbareRuimte.getGerelateerdeWoonplaats().getIdentificatie()));
+		this.woonplaats = Long.parseLong(openbareRuimte.getGerelateerdeWoonplaats().getIdentificatie());
 		
 	}
 	
@@ -71,10 +64,10 @@ public class OpenbareRuimte extends Base {
 	public void setKorteNaam(String korteNaam) {
 		this.korteNaam = korteNaam;
 	}
-	public Woonplaats getWoonplaats() {
+	public Long getWoonplaats() {
 		return woonplaats;
 	}
-	public void setWoonplaats(Woonplaats woonplaats) {
+	public void setWoonplaats(Long woonplaats) {
 		this.woonplaats = woonplaats;
 	}
 }

@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.zip.ZipEntry;
@@ -28,8 +29,10 @@ import nl.kadaster.schemas.bag_verstrekkingen.extract_deelbestand_lvc.v20090901.
 import nl.kadaster.schemas.bag_verstrekkingen.extract_deelbestand_lvc.v20090901.BAGExtractDeelbestandLVC.Antwoord;
 import nl.kadaster.schemas.bag_verstrekkingen.extract_producten_lvc.v20090901.LVCProduct;
 import nl.studioseptember.postcode.type.Base;
+import nl.studioseptember.postcode.type.BaseInterface;
 import nl.studioseptember.postcode.type.Nummer;
 import nl.studioseptember.postcode.type.OpenbareRuimte;
+import nl.studioseptember.postcode.type.Pand;
 import nl.studioseptember.postcode.type.VerblijfsObject;
 import nl.studioseptember.postcode.type.Woonplaats;
 
@@ -37,46 +40,77 @@ public class Parser {
 
 	final static Logger LOG = Logger.getLogger(Parser.class);
 
-	private static Date start = new Date();
-
 	public static void main(String[] args) throws JAXBException, IOException {
 
 		Locale.setDefault(Locale.ENGLISH);
 
-		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("spring.xml");
-
-		// NummerRepository repository = context.getBean(NummerRepository.class);
-
+		Parser parser = new Parser();
+		
 		LOG.info("Starting");
 
 		var files = new File[] { 
-//				new File("var/9999WPL08092018.zip"),
-//				new File("var/9999OPR08092018.zip"),
-//				new File("var/9999NUM08092018.zip"),
+				new File("var/9999WPL08092018.zip"),
+				new File("var/9999OPR08092018.zip"),
+				new File("var/9999NUM08092018.zip"),
+//				new File("var/9999PND08092018.zip"),
 				new File("var/9999VBO08092018.zip"),
 		};
 
 		for (File file : files) {
-			parseZip(file);
+			parser.parseZip(file);
+			parser.persist();
 		}
+		
+		LOG.info("Done.");
+	}
 
-		LOG.info("Persisting");
-
-		SessionFactory sessionFactory = context.getBean(SessionFactory.class);
+	private SessionFactory sessionFactory;
+	private EntityManager entityManager;
+	
+	public Parser() {
+		
+		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("spring.xml");
+		sessionFactory = context.getBean(SessionFactory.class);
+		
 
 		Session session = sessionFactory.openSession();
 
 		EntityManagerFactory entityManagerFactory = session.getEntityManagerFactory();
-
-		batchPersist(woonplaatsen.values(), entityManagerFactory);
-		batchPersist(openbareRuimtes.values(), entityManagerFactory);
-		batchPersist(nummers.values(), entityManagerFactory);
 		
-		LOG.info("Done.");
+
+		entityManager = entityManagerFactory.createEntityManager();
 	}
 	
-	private static void batchPersist(Collection<? extends Base> entities, EntityManagerFactory entityManagerFactory) {
-		EntityManager entityManager = entityManagerFactory.createEntityManager();
+	public void finalize(){
+		if (entityManager != null) {
+			entityManager.close();
+		}
+		sessionFactory.close();
+	}
+	
+	private void persist() {
+		
+
+		LOG.info("Persisting");
+
+		
+
+
+		batchPersist(woonplaatsen.values());
+		batchPersist(openbareRuimtes.values());
+		batchPersist(nummers.values());
+		batchPersist(panden.values());
+		batchPersist(verblijfsobjecten.values());
+		
+		woonplaatsen.clear();
+		openbareRuimtes.clear();
+		nummers.clear();
+		panden.clear();
+		verblijfsobjecten.clear();
+		
+	}
+	
+	private void batchPersist(Collection<? extends Base> entities) {
 		EntityTransaction txn = null;
 		try {
 
@@ -101,69 +135,111 @@ public class Parser {
 				entityManager.persist(entity);
 			}
 			
-
+			LOG.info("Flushing...");
 			txn.commit();
+			LOG.info("Flushed...");
+			
 
 		} catch (RuntimeException e) {
 			if (txn != null && txn.isActive())
 				txn.rollback();
 			throw e;
-		} finally {
-			if (entityManager != null) {
-				entityManager.close();
-			}
 		}
 	}
 
-	private static Map<Long, Woonplaats> woonplaatsen = new HashMap<Long, Woonplaats>();
-	private static Map<Long, OpenbareRuimte> openbareRuimtes = new HashMap<Long, OpenbareRuimte>();
-	private static Map<Long, Nummer> nummers = new HashMap<Long, Nummer>();
-	private static Map<Long, VerblijfsObject> verblijfsobjecten = new HashMap<Long, VerblijfsObject>();
+	private Map<Long, Woonplaats> woonplaatsen = new HashMap<Long, Woonplaats>();
+	private Map<Long, OpenbareRuimte> openbareRuimtes = new HashMap<Long, OpenbareRuimte>();
+	private Map<Long, Nummer> nummers = new HashMap<Long, Nummer>();
+	private Map<Long, VerblijfsObject> verblijfsobjecten = new HashMap<Long, VerblijfsObject>();
+	private Map<Long, Pand> panden = new HashMap<Long, Pand>();
 
-	private static void parseZip(File zip) throws JAXBException, IOException {
+	static int MAX_FILES_PER_ZIP = 2000;
+	
+	private void parseZip(File zip) throws JAXBException, IOException {
+
+		int total = 0;
+		/*
+		final ZipFile file = new ZipFile( zip );
+		
+		try
+		{
+		    final Enumeration<? extends ZipEntry> entries = file.entries();
+		    while ( entries.hasMoreElements() )
+		    {
+		        final ZipEntry entry = entries.nextElement();
+		        total++;
+		    }
+		}
+		finally
+		{
+		    file.close();
+		}*/
+		
 		ZipInputStream zis = new ZipInputStream(new FileInputStream(zip));
+		
+		
 		ZipEntry entry;
-		while ((entry = zis.getNextEntry()) != null) {
+		int count = 0;
+		while (count < MAX_FILES_PER_ZIP && (entry = zis.getNextEntry()) != null) {
+			count++;
 			if (entry.getName().endsWith(".xml")) {
-				LOG.info("Parsing " + entry.getName());
+				LOG.info("Parsing " + entry.getName() + " ("+count+"/"+total+")");
 				var product = parseLVCProduct(zis);
 				LOG.info("Parsed " + entry.getName());
 
 				parseWoonplaatsen(product);
 
-				LOG.info("Have woonplaatsen: " + woonplaatsen.size());
+//				LOG.info("Have woonplaatsen: " + woonplaatsen.size());
 
 				parseOpenbareRuimtes(product);
 
-				LOG.info("Have openbare ruimtes: " + openbareRuimtes.size());
+//				LOG.info("Have openbare ruimtes: " + openbareRuimtes.size());
 
 				parseNummers(product);
-				LOG.info("Have nummers: " + nummers.size());
+//				LOG.info("Have nummers: " + nummers.size());
+
+				parsePanden(product);
+//				LOG.info("Have panden: " + panden.size());
 
 				parseVerblijfsObjecten(product);
-				LOG.info("Have verblijfsobjecten: " + verblijfsobjecten.size());
+//				LOG.info("Have verblijfsobjecten: " + verblijfsobjecten.size());
+//				LOG.info("Have objects: " + (
+//						woonplaatsen.size() + 
+//						openbareRuimtes.size() + 
+//						nummers.size() + 
+//						verblijfsobjecten.size() + 
+//						panden.size()
+//				));
 				
+//				persist();
 			} else {
 				LOG.info("Skipping " + entry.getName());
 			}
 		}
 	}
+	
+	private void parsePanden(LVCProduct product) throws IOException {
+		for (var pand : product.getPand()) {
+			var parsed = new Pand(pand);
+			panden.put(parsed.getIdentificatie(), parsed);
+		}
+	}
 
-	private static void parseOpenbareRuimtes(LVCProduct product) {
+	private void parseOpenbareRuimtes(LVCProduct product) {
 		for (var openbareRuimte : product.getOpenbareRuimte()) {
-			var parsed = new OpenbareRuimte(openbareRuimte, woonplaatsen);
+			var parsed = new OpenbareRuimte(openbareRuimte);
 			openbareRuimtes.put(parsed.getIdentificatie(), parsed);
 		}
 	}
 
-	private static void parseNummers(LVCProduct product) {
+	private void parseNummers(LVCProduct product) {
 		for (var nummer : product.getNummeraanduiding()) {
-			var parsed = new Nummer(nummer, woonplaatsen, openbareRuimtes);
+			var parsed = new Nummer(nummer);
 			nummers.put(parsed.getIdentificatie(), parsed);
 		}
 	}
 
-	private static LVCProduct parseLVCProduct(InputStream stream) throws JAXBException, IOException {
+	private LVCProduct parseLVCProduct(InputStream stream) throws JAXBException, IOException {
 		JAXBContext jaxbContext = JAXBContext.newInstance(BAGExtractDeelbestandLVC.class);
 		Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 		BAGExtractDeelbestandLVC deelbestand = (BAGExtractDeelbestandLVC) jaxbUnmarshaller
@@ -175,7 +251,7 @@ public class Parser {
 		return product;
 	}
 
-	private static void parseWoonplaatsen(LVCProduct product) throws IOException {
+	private void parseWoonplaatsen(LVCProduct product) throws IOException {
 		for (var woonplaats : product.getWoonplaats()) {
 			Woonplaats parsed = new Woonplaats(woonplaats);
 			woonplaatsen.put(parsed.getIdentificatie(), parsed);
@@ -183,7 +259,7 @@ public class Parser {
 
 	}
 
-	private static void parseVerblijfsObjecten(LVCProduct product) throws IOException {
+	private void parseVerblijfsObjecten(LVCProduct product) throws IOException {
 		for (var verblijfsobject : product.getVerblijfsobject()) {
 			VerblijfsObject parsed = new VerblijfsObject(verblijfsobject);
 			verblijfsobjecten .put(parsed.getIdentificatie(), parsed);

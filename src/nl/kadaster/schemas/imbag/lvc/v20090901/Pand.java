@@ -18,6 +18,7 @@ import net.opengis.gml.SurfacePropertyType;
 import nl.kadaster.schemas.imbag.imbag_types.v20090901.Bron;
 import nl.kadaster.schemas.imbag.imbag_types.v20090901.Indicatie;
 import nl.kadaster.schemas.imbag.imbag_types.v20090901.Tijdvakgeldigheid;
+import nl.studioseptember.postcode.type.BaseInterface;
 
 
 /**
@@ -67,7 +68,7 @@ import nl.kadaster.schemas.imbag.imbag_types.v20090901.Tijdvakgeldigheid;
     "inOnderzoek",
     "bron"
 })
-public class Pand {
+public class Pand implements BaseInterface {
 
     @XmlElement(required = true)
     protected String identificatie;
