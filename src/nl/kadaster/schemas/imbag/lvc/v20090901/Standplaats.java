@@ -19,6 +19,7 @@ import nl.kadaster.schemas.imbag.imbag_types.v20090901.Bron;
 import nl.kadaster.schemas.imbag.imbag_types.v20090901.Indicatie;
 import nl.kadaster.schemas.imbag.imbag_types.v20090901.StatusPlaats;
 import nl.kadaster.schemas.imbag.imbag_types.v20090901.Tijdvakgeldigheid;
+import nl.studioseptember.postcode.type.BaseInterface;
 
 
 /**
@@ -71,7 +72,7 @@ import nl.kadaster.schemas.imbag.imbag_types.v20090901.Tijdvakgeldigheid;
     "bron"
 })
 public class Standplaats
-    extends AdresseerbaarObject
+    extends AdresseerbaarObject implements BaseInterface
 {
 
     @XmlElement(required = true)

@@ -151,8 +151,10 @@ public abstract class Base {
 		
 		this.inOnderzoek = inOnderzoek == Indicatie.J;
 		
+		/*
 		this.bronDatum = parseDate(bron.getDocumentdatum());
 		this.bronNummer = bron.getDocumentnummer();
+		*/
 		
 	}
 
@@ -187,6 +189,10 @@ public abstract class Base {
     	System.out.println("Not parsing '"+input+"'");
     	
     	return null;
+    }
+    
+    public Base() {
+    	
     }
     
 }

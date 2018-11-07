@@ -15,6 +15,10 @@ import javax.persistence.OrderColumn;
 import javax.persistence.Table;
 import javax.xml.bind.JAXBElement;
 
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Polygon;
+
 import net.opengis.gml.AbstractSurfaceType;
 import net.opengis.gml.MultiSurfaceType;
 import net.opengis.gml.PolygonType;
@@ -25,24 +29,11 @@ import nl.kadaster.schemas.imbag.imbag_types.v20090901.VlakOfMultiVlak;
 @Entity 
 @Table(name = "cities")
 public class Woonplaats extends Base {
-	
-	@OneToMany(cascade=CascadeType.ALL, orphanRemoval = true)
-	@JoinColumn(name = "object_id", 
-		foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT)
-	)
-	@OrderColumn(name = "id", insertable = false, updatable = false)
-	private List<Polygon> surface;
+
+	private Geometry surface;
 	
 	@Column(name = "name")
 	private String naam;
-
-	public List<Polygon> getSurface() {
-		return surface;
-	}
-
-	public void setSurface(List<Polygon> surface) {
-		this.surface = surface;
-	}
 
 	public String getNaam() {
 		return naam;
@@ -51,6 +42,8 @@ public class Woonplaats extends Base {
 	public void setNaam(String naam) {
 		this.naam = naam;
 	}
+	
+	private static GeometryFactory factory = new GeometryFactory();
 
 	public Woonplaats(nl.kadaster.schemas.imbag.lvc.v20090901.Woonplaats woonplaats) throws IOException {
 
@@ -90,11 +83,13 @@ public class Woonplaats extends Base {
 				}
 			}
 
-			this.surface = new ArrayList<Polygon>(polygons.size());
+			var surface = new ArrayList<Polygon>(polygons.size());
 
 			for (var a = 0; a < polygons.size(); a++) {
-				this.surface.add(a, new Polygon(polygons.get(a), this.identificatie));
+				surface.add(a, nl.studioseptember.postcode.type.Polygon.fromPositions(polygons.get(a)));
 			}
+
+			this.surface = factory.buildGeometry(surface);
 		}
 
 	}
@@ -102,5 +97,9 @@ public class Woonplaats extends Base {
 	@Override
 	public String toString() {
 		return "Woonplaats [" + this.naam + "]";
+	}
+	
+	public Woonplaats() {
+		
 	}
 }

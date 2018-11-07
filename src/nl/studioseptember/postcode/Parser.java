@@ -49,17 +49,19 @@ public class Parser {
 		LOG.info("Starting");
 
 		var files = new File[] { 
-				new File("var/9999WPL08092018.zip"),
-				new File("var/9999OPR08092018.zip"),
-				new File("var/9999NUM08092018.zip"),
-//				new File("var/9999PND08092018.zip"),
-				new File("var/9999VBO08092018.zip"),
+				new File("var/9999WPL08102018.zip"),
+//				new File("var/9999OPR08102018.zip"),
+//				new File("var/9999LIG08102018.zip"),
+//				new File("var/9999STA08102018.zip"),
+//				new File("var/9999VBO08102018.zip"),
+//				new File("var/9999NUM08102018.zip"),
+//				new File("var/9999PND08102018.zip"),
 		};
 
 		for (File file : files) {
 			parser.parseZip(file);
-			parser.persist();
 		}
+		parser.persist();
 		
 		LOG.info("Done.");
 	}
@@ -88,7 +90,7 @@ public class Parser {
 		sessionFactory.close();
 	}
 	
-	private void persist() {
+	protected void persist() {
 		
 
 		LOG.info("Persisting");
@@ -153,9 +155,9 @@ public class Parser {
 	private Map<Long, VerblijfsObject> verblijfsobjecten = new HashMap<Long, VerblijfsObject>();
 	private Map<Long, Pand> panden = new HashMap<Long, Pand>();
 
-	static int MAX_FILES_PER_ZIP = 2000;
+	static int MAX_FILES_PER_ZIP = Integer.MAX_VALUE;
 	
-	private void parseZip(File zip) throws JAXBException, IOException {
+	protected void parseZip(File zip) throws JAXBException, IOException {
 
 		int total = 0;
 		/*
@@ -264,6 +266,18 @@ public class Parser {
 			VerblijfsObject parsed = new VerblijfsObject(verblijfsobject);
 			verblijfsobjecten .put(parsed.getIdentificatie(), parsed);
 		}
+		
+		for (var ligplaats : product.getLigplaats()) {
+			VerblijfsObject parsed = new VerblijfsObject(ligplaats);
+			verblijfsobjecten .put(parsed.getIdentificatie(), parsed);
+		}
+		
+		for (var standplaats : product.getStandplaats()) {
+			VerblijfsObject parsed = new VerblijfsObject(standplaats);
+			verblijfsobjecten .put(parsed.getIdentificatie(), parsed);
+		}
+		
+		
 
 	}
 }

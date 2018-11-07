@@ -18,7 +18,7 @@
 		<property name="driverClassName"
 			value="com.mysql.jdbc.Driver" />
 		<property name="url"
-			value="jdbc:mysql://localhost:3306/postcode_java" />
+			value="jdbc:mysql://localhost:3306/postcode_java2" />
 		<property name="username" value="daan" />
 		<property name="password" value="" />
 	</bean>
@@ -35,7 +35,7 @@
 					create
 				</prop>
 				<prop key="hibernate.dialect">
-					org.hibernate.dialect.MariaDBDialect
+					org.hibernate.spatial.dialect.mysql.MySQL56InnoDBSpatialDialect
 				</prop>
 				<prop key="hibernate.jdbc.batch_size">
 					5000

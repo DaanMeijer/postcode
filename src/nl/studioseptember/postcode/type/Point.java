@@ -7,10 +7,14 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
+
 import rdnaptrans.value.Geographic;
 
-@Entity
-@Table(name = "points")
+//@Entity
+//@Table(name = "points")
 public class Point {
 	
 	@Id
@@ -29,6 +33,7 @@ public class Point {
 	private double height;
 	
 	public Point(Geographic g, Long polygonId) {
+
 		this.latitude = g.lambda;
 		this.longitude = g.phi;
 		this.height = g.h;
@@ -37,7 +42,6 @@ public class Point {
 		
 		this.id = nextId++;
 	}
-	
 	
 	public double getLatitude() {
 		return latitude;
